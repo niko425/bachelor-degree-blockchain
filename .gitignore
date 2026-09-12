@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NEVER commit real secrets)
+.env
+
+# Hardhat generated files
+cache/
+artifacts/
+
+# Frontend build output (added once frontend/ exists)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Editor/OS files
+.vscode/
+.DS_Store
