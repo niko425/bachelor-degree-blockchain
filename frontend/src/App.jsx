@@ -122,6 +122,8 @@ function App() {
   const [candidatesError, setCandidatesError] = useState(null)
   const [votingFor, setVotingFor] = useState(null)
   const [voteError, setVoteError] = useState(null)
+  // Candidate whose vote count should tick once after your vote; cleared when the animation ends
+  const [lastVotedId, setLastVotedId] = useState(null)
 
   const [adminAddress, setAdminAddress] = useState(null)
   const [electionState, setElectionState] = useState(null)
@@ -255,6 +257,7 @@ function App() {
 
   async function castVote(candidateId) {
     setVoteError(null)
+    setLastVotedId(null)
     setVotingFor(candidateId)
     try {
       // Sending a transaction needs a signer; the provider alone can only read
@@ -267,7 +270,11 @@ function App() {
       // Wait until the transaction is mined on Sepolia
       await tx.wait()
 
-      await Promise.all([loadCandidates(provider), loadActivity(provider)])
+      const activityLoaded = loadActivity(provider)
+      await loadCandidates(provider)
+      // Set only after the new count is rendered; setting it earlier would tick the old number
+      setLastVotedId(candidateId)
+      await activityLoaded
     } catch (err) {
       setVoteError(describeVoteError(err))
     } finally {
@@ -330,7 +337,17 @@ function App() {
 
   return (
     <section id="center">
-      <h1>Blockchain Voting</h1>
+      <h1>Blockchain voting</h1>
+
+      <dl className="credential">
+        <dt>Contract</dt>
+        <dd>{BALLOT_ADDRESS}</dd>
+        <dt>Network</dt>
+        <dd>Sepolia</dd>
+      </dl>
+
+      {/* Decorative only, hidden from screen readers */}
+      <span className="contract-watermark" aria-hidden="true">VERIFIABLE</span>
 
       {account ? (
         <p>
@@ -339,11 +356,10 @@ function App() {
       ) : (
         <button
           type="button"
-          className="counter"
           onClick={connectWallet}
           disabled={connecting}
         >
-          {connecting ? 'Connecting...' : 'Connect Wallet'}
+          {connecting ? 'Connecting...' : 'Connect wallet'}
         </button>
       )}
 
@@ -356,15 +372,23 @@ function App() {
       {candidates && candidates.length === 0 && <p>No candidates have been added yet.</p>}
 
       {candidates && candidates.length > 0 && (
-        <ul>
+        <ul className="candidate-list">
           {/* The array index is the candidate ID in the contract, so it is a stable key */}
           {candidates.map((c, i) => (
             <li key={i}>
-              {c.name}: {c.voteCount} {c.voteCount === '1' ? 'vote' : 'votes'}{' '}
+              <span>{c.name}</span>
+              {/* Adding vote-tick starts the CSS animation; only the candidate you just voted for gets it */}
+              <span
+                className={i === lastVotedId ? 'vote-count vote-tick' : 'vote-count'}
+                onAnimationEnd={() => setLastVotedId(null)}
+              >
+                {c.voteCount} {c.voteCount === '1' ? 'vote' : 'votes'}
+              </span>
               <button
                 type="button"
+                className="button-seal"
                 onClick={() => castVote(i)}
-                disabled={votingFor !== null}
+                disabled={votingFor !== null || stateLabel !== 'Voting'}
               >
                 {votingFor === i ? 'Voting...' : 'Vote'}
               </button>
@@ -377,7 +401,7 @@ function App() {
 
       {account && (
         <section aria-labelledby="activity-log-heading">
-          <h2 id="activity-log-heading">Activity Log</h2>
+          <h2 id="activity-log-heading">Activity log</h2>
 
           {activityLoading && <p>Loading activity...</p>}
 
@@ -386,14 +410,13 @@ function App() {
           {!activityLoading && activity && activity.length === 0 && <p>No activity yet.</p>}
 
           {activity && activity.length > 0 && (
-            <ul>
+            <ul className="activity-log">
               {activity.map((entry) => (
                 <li key={entry.key}>
-                  <time dateTime={new Date(entry.timestamp * 1000).toISOString()}>
+                  <time className="activity-time" dateTime={new Date(entry.timestamp * 1000).toISOString()}>
                     {formatBlockTime(entry.timestamp)}
                   </time>
-                  {': '}
-                  {describeActivity(entry, candidates)}
+                  <span>{describeActivity(entry, candidates)}</span>
                 </li>
               ))}
             </ul>
@@ -403,8 +426,8 @@ function App() {
 
       {isAdmin && (
         // Disabling the fieldset disables every input and button inside it while a transaction is pending
-        <fieldset disabled={adminAction !== null}>
-          <legend>Admin Panel</legend>
+        <fieldset className="admin-panel" disabled={adminAction !== null}>
+          <legend>Admin panel</legend>
 
           <p>
             Election state: <strong>{stateLabel}</strong>
@@ -421,8 +444,8 @@ function App() {
                     onChange={(e) => setNewCandidateName(e.target.value)}
                   />
                 </label>{' '}
-                <button type="submit">
-                  {adminAction === 'addCandidate' ? 'Adding...' : 'Add Candidate'}
+                <button type="submit" className="button-seal">
+                  {adminAction === 'addCandidate' ? 'Adding...' : 'Add candidate'}
                 </button>
               </form>
 
@@ -431,39 +454,42 @@ function App() {
                   Voter address{' '}
                   <input
                     type="text"
+                    className="address-input"
                     placeholder="0x..."
                     value={newVoterAddress}
                     onChange={(e) => setNewVoterAddress(e.target.value)}
                   />
                 </label>{' '}
-                <button type="submit">
-                  {adminAction === 'approveVoter' ? 'Approving...' : 'Approve Voter'}
+                <button type="submit" className="button-seal">
+                  {adminAction === 'approveVoter' ? 'Approving...' : 'Approve voter'}
                 </button>
               </form>
 
               <button
                 type="button"
+                className="button-seal"
                 onClick={() => runAdminAction('startVoting', (ballot) => ballot.startVoting(), 'Voting is now open.')}
                 disabled={candidateCount === 0}
               >
-                {adminAction === 'startVoting' ? 'Starting...' : 'Start Voting'}
+                {adminAction === 'startVoting' ? 'Starting...' : 'Start voting'}
               </button>
-              {candidateCount === 0 && <p>Add at least one candidate before starting voting.</p>}
+              {candidateCount === 0 && <p className="helper-text">Add at least one candidate before starting voting.</p>}
             </>
           )}
 
           {stateLabel === 'Voting' && (
             <button
               type="button"
+              className="button-seal"
               onClick={() => runAdminAction('endVoting', (ballot) => ballot.endVoting(), 'Voting has been closed.')}
             >
-              {adminAction === 'endVoting' ? 'Ending...' : 'End Voting'}
+              {adminAction === 'endVoting' ? 'Ending...' : 'End voting'}
             </button>
           )}
 
           {stateLabel === 'Ended' && <p>Voting has ended, showing final results</p>}
 
-          {adminNotice && <p>{adminNotice}</p>}
+          {adminNotice && <p className="notice-success">{adminNotice}</p>}
           {adminError && <p role="alert">{adminError}</p>}
         </fieldset>
       )}
