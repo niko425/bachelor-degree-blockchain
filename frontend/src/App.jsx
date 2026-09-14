@@ -5,25 +5,20 @@ import './App.css'
 
 const SEPOLIA_CHAIN_ID = 11155111n
 
-// Same order as the ElectionState enum in contracts/Ballot.sol
 const ELECTION_STATES = ['Setup', 'Voting', 'Ended']
 
-// Smallest block range queryFilterInChunks will split a failing event query down to
 const MIN_LOG_RANGE = 10
 
-// ethers wraps MetaMask's 4001 "user rejected" as ACTION_REJECTED
 function isUserRejection(err) {
   return err.code === 'ACTION_REJECTED' || err.code === 4001 || err.info?.error?.code === 4001
 }
 
-// Depending on the wallet and RPC node, the revert reason can end up in different fields
 function errorDetails(err) {
   return [err.reason, err.shortMessage, err.info?.error?.message, err.error?.message, err.message]
     .filter(Boolean)
     .join(' ')
 }
 
-// Problems that can happen with any transaction, not just one contract function; null if neither applies
 function describeWalletError(err) {
   if (err.code === 'INSUFFICIENT_FUNDS') {
     return 'This wallet does not have enough Sepolia ETH to pay the transaction fee.'
@@ -34,8 +29,6 @@ function describeWalletError(err) {
   return null
 }
 
-// Turns an ethers/MetaMask error from vote() into a message for the user.
-// The quoted strings must match the require() messages in contracts/Ballot.sol.
 function describeVoteError(err) {
   if (isUserRejection(err)) {
     return 'You rejected the transaction in MetaMask, so no vote was cast.'
@@ -54,7 +47,6 @@ function describeVoteError(err) {
   return describeWalletError(err) ?? `Vote failed: ${err.shortMessage ?? err.message}`
 }
 
-// Same as describeVoteError, for the admin-only functions
 function describeAdminError(err) {
   if (isUserRejection(err)) {
     return 'You rejected the transaction in MetaMask, so nothing was changed.'
@@ -73,9 +65,6 @@ function describeAdminError(err) {
   return describeWalletError(err) ?? `Admin action failed: ${err.shortMessage ?? err.message}`
 }
 
-// Some RPC providers cap the block range of one event query (Alchemy's free tier allows only 10 blocks).
-// If the query fails, split the range in half and query each half, down to MIN_LOG_RANGE blocks;
-// if a range that small still fails, the error is not about the range and is passed on.
 async function queryFilterInChunks(contract, filter, fromBlock, toBlock) {
   try {
     return await contract.queryFilter(filter, fromBlock, toBlock)
@@ -90,10 +79,8 @@ async function queryFilterInChunks(contract, filter, fromBlock, toBlock) {
   }
 }
 
-// Turns one activity entry into a readable line
 function describeActivity(entry, candidates) {
   if (entry.eventName === 'VoteCast') {
-    // Candidate IDs are indexes into the array returned by getResults()
     const name = candidates?.[entry.candidateId]?.name ?? `candidate #${entry.candidateId}`
     return `Vote cast for ${name}`
   }
@@ -108,7 +95,6 @@ function describeActivity(entry, candidates) {
   return `Election state changed to ${newState}`
 }
 
-// Block timestamps are in seconds
 function formatBlockTime(timestamp) {
   return new Date(timestamp * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
@@ -122,7 +108,6 @@ function App() {
   const [candidatesError, setCandidatesError] = useState(null)
   const [votingFor, setVotingFor] = useState(null)
   const [voteError, setVoteError] = useState(null)
-  // Candidate whose vote count should tick once after your vote; cleared when the animation ends
   const [lastVotedId, setLastVotedId] = useState(null)
 
   const [adminAddress, setAdminAddress] = useState(null)
@@ -151,7 +136,6 @@ function App() {
 
     setConnecting(true)
     try {
-      // Opens the MetaMask popup asking the user to share an account with this site
       await window.ethereum.request({ method: 'eth_requestAccounts' })
 
       const browserProvider = new BrowserProvider(window.ethereum)
@@ -162,7 +146,6 @@ function App() {
       await Promise.all([loadCandidates(browserProvider), loadElectionInfo(browserProvider)])
       await loadActivity(browserProvider)
     } catch (err) {
-      // 4001 = user rejected the request in MetaMask
       setError(err.code === 4001 ? 'Connection request was rejected.' : err.message)
     } finally {
       setConnecting(false)
@@ -172,8 +155,6 @@ function App() {
   async function loadCandidates(provider) {
     setCandidatesError(null)
     try {
-      // On any other network there is no contract at BALLOT_ADDRESS, and ethers
-      // would only report an unhelpful "could not decode result data" error
       const { chainId } = await provider.getNetwork()
       if (chainId !== SEPOLIA_CHAIN_ID) {
         setCandidatesError('MetaMask is not on the Sepolia network. Switch to Sepolia, reload the page and connect again.')
@@ -183,7 +164,6 @@ function App() {
       const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, provider)
       const results = await ballot.getResults()
 
-      // voteCount comes back as a BigInt, so convert it for rendering
       setCandidates(results.map((c) => ({ name: c.name, voteCount: c.voteCount.toString() })))
     } catch (err) {
       setCandidatesError(`Could not load candidates from the contract: ${err.shortMessage ?? err.message}`)
@@ -192,7 +172,6 @@ function App() {
 
   async function loadElectionInfo(provider) {
     try {
-      // loadCandidates already shows the wrong-network message, so there is nothing to add here
       const { chainId } = await provider.getNetwork()
       if (chainId !== SEPOLIA_CHAIN_ID) {
         return
@@ -202,11 +181,9 @@ function App() {
       const [admin, state, count] = await Promise.all([ballot.admin(), ballot.state(), ballot.candidateCount()])
 
       setAdminAddress(admin)
-      // state and candidateCount come back as BigInt
       setElectionState(Number(state))
       setCandidateCount(Number(count))
     } catch (err) {
-      // Only visible inside the admin panel, so non-admin users see nothing extra
       setAdminError(`Could not load election details from the contract: ${err.shortMessage ?? err.message}`)
     }
   }
@@ -215,30 +192,24 @@ function App() {
     setActivityError(null)
     setActivityLoading(true)
     try {
-      // loadCandidates already shows the wrong-network message, so there is nothing to add here
       const { chainId } = await provider.getNetwork()
       if (chainId !== SEPOLIA_CHAIN_ID) {
         return
       }
 
       const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, provider)
-      // A fixed block number (not 'latest') so both queries and the range splitting cover the same blocks
       const latestBlock = await provider.getBlockNumber()
       const [votes, stateChanges] = await Promise.all([
         queryFilterInChunks(ballot, ballot.filters.VoteCast(), BALLOT_DEPLOY_BLOCK, latestBlock),
         queryFilterInChunks(ballot, ballot.filters.StateChanged(), BALLOT_DEPLOY_BLOCK, latestBlock),
       ])
 
-      // Chronological: by block, then by the log's position within the block
       const events = [...votes, ...stateChanges].sort((a, b) => a.blockNumber - b.blockNumber || a.index - b.index)
 
-      // One getBlock call per distinct block, since several events can share a block
       const blockNumbers = [...new Set(events.map((e) => e.blockNumber))]
       const blocks = await Promise.all(blockNumbers.map((blockNumber) => provider.getBlock(blockNumber)))
       const timestamps = new Map(blocks.map((block) => [block.number, block.timestamp]))
 
-      // The voter address from VoteCast is deliberately not kept: the log shows which
-      // candidate got a vote, not who cast it
       setActivity(events.map((e) => ({
         key: `${e.transactionHash}-${e.index}`,
         eventName: e.eventName,
@@ -247,7 +218,6 @@ function App() {
         timestamp: timestamps.get(e.blockNumber),
       })))
     } catch (err) {
-      // The RPC's own message (e.g. a provider's block-range limit) is more useful than ethers' generic one
       const reason = err.error?.message ?? err.info?.error?.message ?? err.shortMessage ?? err.message
       setActivityError(`Could not load the activity log: ${reason}`)
     } finally {
@@ -260,19 +230,15 @@ function App() {
     setLastVotedId(null)
     setVotingFor(candidateId)
     try {
-      // Sending a transaction needs a signer; the provider alone can only read
       const signer = await provider.getSigner()
       const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, signer)
 
-      // ethers estimates gas first, so a vote that would revert fails here before MetaMask opens
       const tx = await ballot.vote(candidateId)
 
-      // Wait until the transaction is mined on Sepolia
       await tx.wait()
 
       const activityLoaded = loadActivity(provider)
       await loadCandidates(provider)
-      // Set only after the new count is rendered; setting it earlier would tick the old number
       setLastVotedId(candidateId)
       await activityLoaded
     } catch (err) {
@@ -282,8 +248,6 @@ function App() {
     }
   }
 
-  // Sends one admin transaction with a signer, waits until it is mined, then refreshes the
-  // candidate list, election state, candidateCount and activity log. Returns true if the transaction succeeded.
   async function runAdminAction(action, send, successNotice) {
     setAdminError(null)
     setAdminNotice(null)
@@ -323,7 +287,6 @@ function App() {
   async function handleApproveVoter(event) {
     event.preventDefault()
     const address = newVoterAddress.trim()
-    // Checked up front: ethers would otherwise try to resolve any other text as an ENS name
     if (!isAddress(address)) {
       setAdminNotice(null)
       setAdminError('Enter a valid wallet address (0x followed by 40 hexadecimal characters), copied exactly.')
@@ -346,7 +309,6 @@ function App() {
         <dd>Sepolia</dd>
       </dl>
 
-      {/* Decorative only, hidden from screen readers */}
       <span className="contract-watermark" aria-hidden="true">VERIFIABLE</span>
 
       {account ? (
@@ -373,11 +335,9 @@ function App() {
 
       {candidates && candidates.length > 0 && (
         <ul className="candidate-list">
-          {/* The array index is the candidate ID in the contract, so it is a stable key */}
           {candidates.map((c, i) => (
             <li key={i}>
               <span>{c.name}</span>
-              {/* Adding vote-tick starts the CSS animation; only the candidate you just voted for gets it */}
               <span
                 className={i === lastVotedId ? 'vote-count vote-tick' : 'vote-count'}
                 onAnimationEnd={() => setLastVotedId(null)}
@@ -425,7 +385,6 @@ function App() {
       )}
 
       {isAdmin && (
-        // Disabling the fieldset disables every input and button inside it while a transaction is pending
         <fieldset className="admin-panel" disabled={adminAction !== null}>
           <legend>Admin panel</legend>
 

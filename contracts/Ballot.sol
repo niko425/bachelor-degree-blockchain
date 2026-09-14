@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 contract Ballot {
-    // The address allowed to manage the election (set once, at deployment).
     address public admin;
 
     struct Candidate {
@@ -10,24 +9,15 @@ contract Ballot {
         uint256 voteCount;
     }
 
-    // candidateId => Candidate
     mapping(uint256 => Candidate) public candidates;
     uint256 public candidateCount;
 
-    // Addresses approved to vote (whitelist set by admin — answers the
-    // "one person, many wallets" problem: admin only approves one wallet
-    // per verified voter before the election starts).
     mapping(address => bool) public isApprovedVoter;
     mapping(address => bool) public hasVoted;
 
-    // Setup: candidates/voters can be configured, voting not yet open.
-    // Voting: roster is locked, approved voters can cast votes.
-    // Ended: nothing changes anymore, results are final.
     enum ElectionState { Setup, Voting, Ended }
     ElectionState public state = ElectionState.Setup;
 
-    // Emitted so off-chain clients (e.g. the frontend) can react to changes
-    // without polling contract storage.
     event VoteCast(address indexed voter, uint256 indexed candidateId);
     event StateChanged(ElectionState newState);
 
@@ -50,7 +40,6 @@ contract Ballot {
         candidateCount++;
     }
 
-    // Admin approves a single wallet address as belonging to one verified voter.
     function approveVoter(address _voter) public onlyAdmin inState(ElectionState.Setup) {
         isApprovedVoter[_voter] = true;
     }

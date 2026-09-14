@@ -5,8 +5,6 @@ describe("Ballot", function () {
   let ballot;
   let admin, voter1, voter2, outsider;
 
-  // Runs before every single test below, so each test starts from a
-  // freshly deployed contract — no leftover state from a previous test.
   beforeEach(async function () {
     [admin, voter1, voter2, outsider] = await ethers.getSigners();
     const Ballot = await ethers.getContractFactory("Ballot");
@@ -50,7 +48,7 @@ describe("Ballot", function () {
 
   describe("election state", function () {
     it("starts in the Setup state", async function () {
-      expect(await ballot.state()).to.equal(0); // Setup
+      expect(await ballot.state()).to.equal(0);
     });
 
     it("rejects starting voting with zero candidates", async function () {
@@ -91,7 +89,6 @@ describe("Ballot", function () {
         "Only admin can perform this action"
       );
 
-      // Move to Voting so endVoting() would otherwise be allowed.
       await ballot.startVoting();
       await expect(ballot.connect(outsider).endVoting()).to.be.revertedWith(
         "Only admin can perform this action"
@@ -116,7 +113,7 @@ describe("Ballot", function () {
       await ballot.addCandidate("Alice");
       await expect(ballot.startVoting())
         .to.emit(ballot, "StateChanged")
-        .withArgs(1); // Voting
+        .withArgs(1);
     });
   });
 
@@ -155,7 +152,6 @@ describe("Ballot", function () {
     });
 
     it("emits VoteCast with the voter address and candidate ID", async function () {
-      // Vote for candidate 1 (not 0) so a wrong/default ID can't pass by accident.
       await expect(ballot.connect(voter1).vote(1))
         .to.emit(ballot, "VoteCast")
         .withArgs(voter1.address, 1);
