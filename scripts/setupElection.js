@@ -5,7 +5,7 @@ const hre = require("hardhat");
 // ES module `export` syntax and this script runs as CommonJS under Hardhat.
 // If you redeploy, update this AND frontend/src/contract.js AND deployment.md.
 // UPDATE THIS after running deploy.js again for the demo redeploy:
-const BALLOT_ADDRESS = "0xfc4f8F53F620C80713bc996eebFd01b0D6a25f7f";
+const BALLOT_ADDRESS = "0xA7814EdBdfB9C1BBd73620fb55F93375A403F6E3";
 
 // Additional voter accounts created in MetaMask for the live demo, each
 // funded with a little Sepolia ETH so they can pay for their own vote().
@@ -42,6 +42,15 @@ async function main() {
   const startTx = await ballot.startVoting();
   await startTx.wait();
   console.log("Voting is now open.");
+
+  // Admin casts their own vote automatically, since we have this account's
+  // key. Voter1/Voter3/Voter4 only exist in MetaMask (by design, their keys
+  // were never exported), so those 3 votes must be cast manually in the
+  // browser right after this script finishes.
+  const voteTx = await ballot.vote(0); // vote for Candidate A
+  await voteTx.wait();
+  console.log("Admin voted for Candidate A.");
+  console.log("Now vote manually as Voter1, Voter3, and Voter4 in the browser.");
 }
 
 main().catch((error) => {
