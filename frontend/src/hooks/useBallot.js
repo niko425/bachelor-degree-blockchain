@@ -5,7 +5,7 @@ import { ELECTION_STATES } from '../lib/constants'
 import { describeAdminError, describeVoteError } from '../lib/errors'
 import { isOnSepolia } from './useWallet'
 
-export function useBallot(provider, electionAddress, loadActivity) {
+export function useBallot(provider, electionAddress, loadActivity, onElectionChanged) {
   const [candidates, setCandidates] = useState(null)
   const [candidatesError, setCandidatesError] = useState(null)
   const [votingFor, setVotingFor] = useState(null)
@@ -15,6 +15,8 @@ export function useBallot(provider, electionAddress, loadActivity) {
   const [adminAddress, setAdminAddress] = useState(null)
   const [electionState, setElectionState] = useState(null)
   const [candidateCount, setCandidateCount] = useState(null)
+  const [approvedVoterCount, setApprovedVoterCount] = useState(null)
+  const [totalVotes, setTotalVotes] = useState(null)
   const [adminAction, setAdminAction] = useState(null)
   const [adminError, setAdminError] = useState(null)
   const [adminNotice, setAdminNotice] = useState(null)
@@ -45,11 +47,19 @@ export function useBallot(provider, electionAddress, loadActivity) {
       }
 
       const ballot = new Contract(electionAddress, BALLOT_ABI, provider)
-      const [admin, state, count] = await Promise.all([ballot.admin(), ballot.state(), ballot.candidateCount()])
+      const [admin, state, count, approved, votes] = await Promise.all([
+        ballot.admin(),
+        ballot.state(),
+        ballot.candidateCount(),
+        ballot.approvedVoterCount(),
+        ballot.totalVotes(),
+      ])
 
       setAdminAddress(admin)
       setElectionState(Number(state))
       setCandidateCount(Number(count))
+      setApprovedVoterCount(Number(approved))
+      setTotalVotes(Number(votes))
     } catch (err) {
       setAdminError(`Could not load election details from the contract: ${err.shortMessage ?? err.message}`)
     }
@@ -68,9 +78,12 @@ export function useBallot(provider, electionAddress, loadActivity) {
       await tx.wait()
 
       const activityLoaded = loadActivity(provider)
+      const electionInfoLoaded = loadElectionInfo(provider)
       await loadCandidates(provider)
       setLastVotedId(candidateId)
-      await activityLoaded
+      await Promise.all([activityLoaded, electionInfoLoaded])
+
+      onElectionChanged?.()
     } catch (err) {
       setVoteError(describeVoteError(err))
     } finally {
@@ -95,6 +108,8 @@ export function useBallot(provider, electionAddress, loadActivity) {
 
       setAdminNotice(successNotice)
       await Promise.all([loadCandidates(provider), loadElectionInfo(provider), loadActivity(provider)])
+
+      onElectionChanged?.()
       return true
     } catch (err) {
       setAdminError(describeAdminError(err))
@@ -143,6 +158,8 @@ export function useBallot(provider, electionAddress, loadActivity) {
     adminAddress,
     electionState,
     candidateCount,
+    approvedVoterCount,
+    totalVotes,
     adminAction,
     adminError,
     adminNotice,

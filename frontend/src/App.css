@@ -295,3 +295,80 @@ a {
 .back-link {
   font-size: 0.875rem;
 }
+
+.election-list {
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+}
+
+.election-figure {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .election-list {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px 24px;
+  margin: 24px 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.stats dt {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.stats dd {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.results-chart {
+  margin: 16px 0;
+}
+
+.results-legend {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.results-legend > li {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.results-swatch {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.results-figure {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

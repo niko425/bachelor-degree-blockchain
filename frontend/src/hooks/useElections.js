@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Contract } from 'ethers'
 import { BALLOT_ABI, FACTORY_ABI, FACTORY_ADDRESS, FACTORY_DEPLOY_BLOCK } from '../contract'
 import { ELECTION_STATES } from '../lib/constants'
@@ -15,7 +15,7 @@ export function useElections() {
   const [createError, setCreateError] = useState(null)
   const [createNotice, setCreateNotice] = useState(null)
 
-  async function loadElections(provider) {
+  const loadElections = useCallback(async (provider) => {
     setError(null)
     setLoading(true)
     try {
@@ -38,9 +38,11 @@ export function useElections() {
         addresses.map(async (electionAddress) => {
           const event = createdByAddress.get(electionAddress.toLowerCase())
           const ballot = new Contract(electionAddress, BALLOT_ABI, provider)
-          const [title, state] = await Promise.all([
+          const [title, state, approved, votes] = await Promise.all([
             event ? event.args.title : ballot.title(),
             ballot.state(),
+            ballot.approvedVoterCount(),
+            ballot.totalVotes(),
           ])
 
           return {
@@ -48,6 +50,8 @@ export function useElections() {
             title,
             state: Number(state),
             stateLabel: ELECTION_STATES[Number(state)],
+            approvedVoterCount: Number(approved),
+            totalVotes: Number(votes),
             createdBlock: event ? event.blockNumber : FACTORY_DEPLOY_BLOCK,
           }
         })
@@ -61,7 +65,7 @@ export function useElections() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   async function createElection(provider, rawTitle) {
     setCreateError(null)

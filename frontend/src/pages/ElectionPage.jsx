@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { isAddress } from 'ethers'
 import ActivityLog from '../components/ActivityLog'
 import AdminPanel from '../components/AdminPanel'
 import CandidateList from '../components/CandidateList'
 import ContractInfo from '../components/ContractInfo'
+import ElectionStats from '../components/ElectionStats'
+import ResultsChart from '../components/ResultsChart'
 import WalletConnect from '../components/WalletConnect'
 import { useActivityLog } from '../hooks/useActivityLog'
 import { useBallot } from '../hooks/useBallot'
@@ -17,8 +19,16 @@ function ElectionPage({ wallet, factory, onConnect }) {
     (candidate) => candidate.address.toLowerCase() === address.toLowerCase()
   )
 
+  const loadElections = factory.loadElections
+
+  const refreshElections = useCallback(() => {
+    if (provider) {
+      loadElections(provider)
+    }
+  }, [provider, loadElections])
+
   const activityLog = useActivityLog(address, election?.createdBlock)
-  const ballot = useBallot(provider, address, activityLog.loadActivity)
+  const ballot = useBallot(provider, address, activityLog.loadActivity, refreshElections)
 
   const loadCandidates = ballot.loadCandidates
   const loadElectionInfo = ballot.loadElectionInfo
@@ -63,7 +73,7 @@ function ElectionPage({ wallet, factory, onConnect }) {
         <p role="alert">This is not a valid contract address.</p>
       )}
 
-      {account && isAddress(address) && factory.loading && <p>Loading election...</p>}
+      {account && isAddress(address) && factory.loading && !factory.elections && <p>Loading election...</p>}
 
       {account && isAddress(address) && !factory.loading && factory.elections && !election && (
         <p role="alert">This address is not an election created by this factory.</p>
@@ -71,6 +81,13 @@ function ElectionPage({ wallet, factory, onConnect }) {
 
       {election && (
         <>
+          <ElectionStats
+            approvedVoterCount={ballot.approvedVoterCount}
+            totalVotes={ballot.totalVotes}
+            candidateCount={ballot.candidateCount}
+            stateLabel={ballot.stateLabel}
+          />
+
           <CandidateList
             account={account}
             candidates={ballot.candidates}
@@ -82,6 +99,8 @@ function ElectionPage({ wallet, factory, onConnect }) {
             onVote={ballot.castVote}
             onTickEnd={ballot.clearVoteTick}
           />
+
+          <ResultsChart candidates={ballot.candidates} />
 
           <ActivityLog
             account={account}

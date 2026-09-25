@@ -1,12 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ContractInfo from '../components/ContractInfo'
 import WalletConnect from '../components/WalletConnect'
 import { FACTORY_ADDRESS } from '../contract'
+import { formatTurnout } from '../lib/format'
 
 function ElectionListPage({ wallet, factory, onConnect }) {
   const { account, provider } = wallet
   const [newTitle, setNewTitle] = useState('')
+
+  const loadElections = factory.loadElections
+
+  useEffect(() => {
+    if (!provider) {
+      return
+    }
+
+    loadElections(provider)
+  }, [provider, loadElections])
 
   const isOwner =
     account !== null && factory.owner !== null && account.toLowerCase() === factory.owner.toLowerCase()
@@ -34,7 +45,7 @@ function ElectionListPage({ wallet, factory, onConnect }) {
 
       {!account && <p>Connect your wallet to see the elections.</p>}
 
-      {account && factory.loading && <p>Loading elections...</p>}
+      {account && factory.loading && !factory.elections && <p>Loading elections...</p>}
 
       {factory.error && <p role="alert">{factory.error}</p>}
 
@@ -46,6 +57,12 @@ function ElectionListPage({ wallet, factory, onConnect }) {
             <li key={election.address}>
               <span>{election.title}</span>
               <span className="election-state">{election.stateLabel}</span>
+              <span className="election-figure">
+                {election.totalVotes} {election.totalVotes === 1 ? 'vote' : 'votes'}
+              </span>
+              <span className="election-figure">
+                {formatTurnout(election.totalVotes, election.approvedVoterCount)}
+              </span>
               <Link to={`/election/${election.address}`}>Open</Link>
             </li>
           ))}
