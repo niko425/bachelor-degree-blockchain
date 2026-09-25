@@ -8,7 +8,7 @@ describe("Ballot", function () {
   beforeEach(async function () {
     [admin, voter1, voter2, outsider] = await ethers.getSigners();
     const Ballot = await ethers.getContractFactory("Ballot");
-    ballot = await Ballot.deploy();
+    ballot = await Ballot.deploy("Test election", admin.address);
   });
 
   describe("Deployment", function () {
@@ -173,6 +173,64 @@ describe("Ballot", function () {
       expect(results.length).to.equal(2);
       expect(results[0].voteCount).to.equal(2);
       expect(results[1].voteCount).to.equal(0);
+    });
+  });
+
+  describe("title", function () {
+    it("stores the title given at deployment", async function () {
+      expect(await ballot.title()).to.equal("Test election");
+    });
+  });
+
+  describe("voter approval limits", function () {
+    it("rejects approving the same voter twice", async function () {
+      await ballot.approveVoter(voter1.address);
+      await expect(ballot.approveVoter(voter1.address)).to.be.revertedWith(
+        "Voter already approved"
+      );
+    });
+
+    it("rejects approving the zero address", async function () {
+      await expect(ballot.approveVoter(ethers.ZeroAddress)).to.be.revertedWith(
+        "Voter address cannot be zero"
+      );
+    });
+
+    it("counts each approved voter", async function () {
+      expect(await ballot.approvedVoterCount()).to.equal(0);
+
+      await ballot.approveVoter(voter1.address);
+      await ballot.approveVoter(voter2.address);
+
+      expect(await ballot.approvedVoterCount()).to.equal(2);
+    });
+  });
+
+  describe("totalVotes", function () {
+    it("counts every vote cast", async function () {
+      await ballot.addCandidate("Alice");
+      await ballot.addCandidate("Bob");
+      await ballot.approveVoter(voter1.address);
+      await ballot.approveVoter(voter2.address);
+      await ballot.startVoting();
+
+      expect(await ballot.totalVotes()).to.equal(0);
+
+      await ballot.connect(voter1).vote(0);
+      await ballot.connect(voter2).vote(1);
+
+      expect(await ballot.totalVotes()).to.equal(2);
+    });
+  });
+
+  describe("endVoting", function () {
+    it("emits StateChanged with the Ended state when voting ends", async function () {
+      await ballot.addCandidate("Alice");
+      await ballot.startVoting();
+
+      await expect(ballot.endVoting())
+        .to.emit(ballot, "StateChanged")
+        .withArgs(2);
     });
   });
 });

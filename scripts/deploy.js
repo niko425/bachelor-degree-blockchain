@@ -1,16 +1,16 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Deploying Ballot contract...");
+  console.log("Deploying ElectionFactory contract...");
 
-  const Ballot = await hre.ethers.getContractFactory("Ballot");
-  const ballot = await Ballot.deploy();
+  const ElectionFactory = await hre.ethers.getContractFactory("ElectionFactory");
+  const factory = await ElectionFactory.deploy();
 
-  await ballot.waitForDeployment();
+  await factory.waitForDeployment();
 
-  const address = await ballot.getAddress();
-  console.log("Ballot deployed to:", address);
-  console.log("Admin address:", await ballot.admin());
+  const address = await factory.getAddress();
+  console.log("ElectionFactory deployed to:", address);
+  console.log("Owner address:", await factory.owner());
 }
 
 main().catch((error) => {

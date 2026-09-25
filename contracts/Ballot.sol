@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 contract Ballot {
+    string public title;
     address public admin;
 
     struct Candidate {
@@ -14,6 +15,8 @@ contract Ballot {
 
     mapping(address => bool) public isApprovedVoter;
     mapping(address => bool) public hasVoted;
+    uint256 public approvedVoterCount;
+    uint256 public totalVotes;
 
     enum ElectionState { Setup, Voting, Ended }
     ElectionState public state = ElectionState.Setup;
@@ -31,8 +34,9 @@ contract Ballot {
         _;
     }
 
-    constructor() {
-        admin = msg.sender;
+    constructor(string memory _title, address _admin) {
+        title = _title;
+        admin = _admin;
     }
 
     function addCandidate(string memory _name) public onlyAdmin inState(ElectionState.Setup) {
@@ -41,7 +45,10 @@ contract Ballot {
     }
 
     function approveVoter(address _voter) public onlyAdmin inState(ElectionState.Setup) {
+        require(!isApprovedVoter[_voter], "Voter already approved");
+        require(_voter != address(0), "Voter address cannot be zero");
         isApprovedVoter[_voter] = true;
+        approvedVoterCount++;
     }
 
     function startVoting() public onlyAdmin inState(ElectionState.Setup) {
@@ -62,6 +69,7 @@ contract Ballot {
 
         hasVoted[msg.sender] = true;
         candidates[_candidateId].voteCount++;
+        totalVotes++;
         emit VoteCast(msg.sender, _candidateId);
     }
 
