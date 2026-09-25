@@ -1,10 +1,8 @@
-import { BALLOT_ADDRESS } from '../contract'
-
-function ContractInfo() {
+function ContractInfo({ label = 'Contract', address }) {
   return (
     <dl className="credential">
-      <dt>Contract</dt>
-      <dd>{BALLOT_ADDRESS}</dd>
+      <dt>{label}</dt>
+      <dd>{address}</dd>
       <dt>Network</dt>
       <dd>Sepolia</dd>
     </dl>

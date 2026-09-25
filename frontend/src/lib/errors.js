@@ -42,6 +42,18 @@ export function describeAdminError(err) {
   }
 
   const details = errorDetails(err)
+  if (details.includes('Only owner can create elections')) {
+    return 'Only the factory owner can create elections.'
+  }
+  if (details.includes('Election title cannot be empty')) {
+    return 'Enter a title for the election.'
+  }
+  if (details.includes('Voter already approved')) {
+    return 'That wallet is already an approved voter.'
+  }
+  if (details.includes('Voter address cannot be zero')) {
+    return 'Enter a real wallet address; the zero address cannot be approved.'
+  }
   if (details.includes('Only admin can perform this action')) {
     return 'Only the election admin can do this. Check that MetaMask is still on the admin account.'
   }

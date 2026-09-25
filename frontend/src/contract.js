@@ -1,5 +1,7 @@
-export const BALLOT_ADDRESS = "0x4894b986e30F2fE3043c5A7980Ee98867f38CB65";
+export const FACTORY_ADDRESS = "0xdeA2C4b34f3bd46c4BB82a36DDFd22671BC17352";
 
-export const BALLOT_DEPLOY_BLOCK = 11705053;
+export const FACTORY_DEPLOY_BLOCK = 11778467;
+
+export { abi as FACTORY_ABI } from "../../artifacts/contracts/ElectionFactory.sol/ElectionFactory.json";
 
 export { abi as BALLOT_ABI } from "../../artifacts/contracts/Ballot.sol/Ballot.json";

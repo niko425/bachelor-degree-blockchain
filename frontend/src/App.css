@@ -163,6 +163,7 @@ input::placeholder {
 }
 
 .candidate-list,
+.election-list,
 .activity-log {
   display: grid;
   margin: 0;
@@ -171,7 +172,8 @@ input::placeholder {
   border-top: 1px solid var(--rule);
 }
 
-.candidate-list {
+.candidate-list,
+.election-list {
   grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
@@ -180,6 +182,7 @@ input::placeholder {
 }
 
 .candidate-list > li,
+.election-list > li,
 .activity-log > li {
   display: grid;
   grid-column: 1 / -1;
@@ -189,7 +192,8 @@ input::placeholder {
   border-bottom: 1px solid var(--rule);
 }
 
-.candidate-list > li {
+.candidate-list > li,
+.election-list > li {
   align-items: center;
   padding: 12px 0;
 }
@@ -273,4 +277,21 @@ input::placeholder {
 
 [role='alert'] {
   color: var(--alert);
+}
+
+.election-state {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.back-link {
+  font-size: 0.875rem;
 }

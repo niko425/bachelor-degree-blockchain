@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Contract, isAddress } from 'ethers'
-import { BALLOT_ADDRESS, BALLOT_ABI } from '../contract'
+import { BALLOT_ABI } from '../contract'
 import { ELECTION_STATES } from '../lib/constants'
 import { describeAdminError, describeVoteError } from '../lib/errors'
 import { isOnSepolia } from './useWallet'
 
-export function useBallot(provider, loadActivity) {
+export function useBallot(provider, electionAddress, loadActivity) {
   const [candidates, setCandidates] = useState(null)
   const [candidatesError, setCandidatesError] = useState(null)
   const [votingFor, setVotingFor] = useState(null)
@@ -21,7 +21,7 @@ export function useBallot(provider, loadActivity) {
 
   const stateLabel = ELECTION_STATES[electionState]
 
-  async function loadCandidates(provider) {
+  const loadCandidates = useCallback(async (provider) => {
     setCandidatesError(null)
     try {
       if (!(await isOnSepolia(provider))) {
@@ -29,22 +29,22 @@ export function useBallot(provider, loadActivity) {
         return
       }
 
-      const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, provider)
+      const ballot = new Contract(electionAddress, BALLOT_ABI, provider)
       const results = await ballot.getResults()
 
       setCandidates(results.map((c) => ({ name: c.name, voteCount: c.voteCount.toString() })))
     } catch (err) {
       setCandidatesError(`Could not load candidates from the contract: ${err.shortMessage ?? err.message}`)
     }
-  }
+  }, [electionAddress])
 
-  async function loadElectionInfo(provider) {
+  const loadElectionInfo = useCallback(async (provider) => {
     try {
       if (!(await isOnSepolia(provider))) {
         return
       }
 
-      const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, provider)
+      const ballot = new Contract(electionAddress, BALLOT_ABI, provider)
       const [admin, state, count] = await Promise.all([ballot.admin(), ballot.state(), ballot.candidateCount()])
 
       setAdminAddress(admin)
@@ -53,7 +53,7 @@ export function useBallot(provider, loadActivity) {
     } catch (err) {
       setAdminError(`Could not load election details from the contract: ${err.shortMessage ?? err.message}`)
     }
-  }
+  }, [electionAddress])
 
   async function castVote(candidateId) {
     setVoteError(null)
@@ -61,7 +61,7 @@ export function useBallot(provider, loadActivity) {
     setVotingFor(candidateId)
     try {
       const signer = await provider.getSigner()
-      const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, signer)
+      const ballot = new Contract(electionAddress, BALLOT_ABI, signer)
 
       const tx = await ballot.vote(candidateId)
 
@@ -88,7 +88,7 @@ export function useBallot(provider, loadActivity) {
     setAdminAction(action)
     try {
       const signer = await provider.getSigner()
-      const ballot = new Contract(BALLOT_ADDRESS, BALLOT_ABI, signer)
+      const ballot = new Contract(electionAddress, BALLOT_ABI, signer)
 
       const tx = await send(ballot)
       await tx.wait()
