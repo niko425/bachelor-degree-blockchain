@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { BrowserProvider } from 'ethers'
+import { useEffect, useState } from 'react'
+import { BrowserProvider, getAddress } from 'ethers'
 import { SEPOLIA_CHAIN_ID } from '../lib/constants'
 
 export async function isOnSepolia(provider) {
@@ -37,6 +37,37 @@ export function useWallet() {
       setConnecting(false)
     }
   }
+
+  useEffect(() => {
+    if (!window.ethereum || account === null) {
+      return
+    }
+
+    function handleAccountsChanged(accounts) {
+      if (accounts.length === 0) {
+        setAccount(null)
+        setProvider(null)
+        setError(null)
+        return
+      }
+
+      setError(null)
+      setAccount(getAddress(accounts[0]))
+      setProvider(new BrowserProvider(window.ethereum))
+    }
+
+    function handleChainChanged() {
+      window.location.reload()
+    }
+
+    window.ethereum.on('accountsChanged', handleAccountsChanged)
+    window.ethereum.on('chainChanged', handleChainChanged)
+
+    return () => {
+      window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
+      window.ethereum.removeListener('chainChanged', handleChainChanged)
+    }
+  }, [account])
 
   return { account, provider, error, connecting, connect }
 }

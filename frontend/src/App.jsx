@@ -19,7 +19,7 @@ function App() {
     <section id="center">
       <span className="contract-watermark" aria-hidden="true">VERIFIABLE</span>
 
-      <Routes>
+      <Routes key={wallet.account ?? 'disconnected'}>
         <Route
           path="/"
           element={<ElectionListPage wallet={wallet} factory={factory} onConnect={handleConnect} />}
