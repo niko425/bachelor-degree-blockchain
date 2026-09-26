@@ -8,60 +8,64 @@ export function errorDetails(err) {
     .join(' ')
 }
 
-export function describeWalletError(err) {
+export function describeWalletError(err, t) {
   if (err.code === 'INSUFFICIENT_FUNDS') {
-    return 'This wallet does not have enough Sepolia ETH to pay the transaction fee.'
+    return t('errors.insufficientFunds')
   }
   if (err.code === 'NETWORK_ERROR') {
-    return 'MetaMask switched networks. Switch back to Sepolia, reload the page and connect again.'
+    return t('errors.networkChanged')
   }
   return null
 }
 
-export function describeVoteError(err) {
+export function describeVoteError(err, t) {
   if (isUserRejection(err)) {
-    return 'You rejected the transaction in MetaMask, so no vote was cast.'
+    return t('errors.rejectedVote')
   }
 
   const details = errorDetails(err)
   if (details.includes('You have already voted')) {
-    return 'You have already voted in this election. Each approved wallet can vote only once.'
+    return t('errors.alreadyVoted')
   }
   if (details.includes('You are not approved to vote')) {
-    return 'This wallet is not an approved voter. Ask the election admin to approve your address.'
+    return t('errors.notApproved')
   }
   if (details.includes('Action not allowed in current election state')) {
-    return 'Voting is not open right now.'
+    return t('errors.votingNotOpen')
   }
-  return describeWalletError(err) ?? `Vote failed: ${err.shortMessage ?? err.message}`
+  return (
+    describeWalletError(err, t) ?? t('errors.voteFailed', { reason: err.shortMessage ?? err.message })
+  )
 }
 
-export function describeAdminError(err) {
+export function describeAdminError(err, t) {
   if (isUserRejection(err)) {
-    return 'You rejected the transaction in MetaMask, so nothing was changed.'
+    return t('errors.rejectedAdmin')
   }
 
   const details = errorDetails(err)
   if (details.includes('Only owner can create elections')) {
-    return 'Only the factory owner can create elections.'
+    return t('errors.onlyOwner')
   }
   if (details.includes('Election title cannot be empty')) {
-    return 'Enter a title for the election.'
+    return t('errors.emptyTitle')
   }
   if (details.includes('Voter already approved')) {
-    return 'That wallet is already an approved voter.'
+    return t('errors.voterAlreadyApproved')
   }
   if (details.includes('Voter address cannot be zero')) {
-    return 'Enter a real wallet address; the zero address cannot be approved.'
+    return t('errors.zeroAddress')
   }
   if (details.includes('Only admin can perform this action')) {
-    return 'Only the election admin can do this. Check that MetaMask is still on the admin account.'
+    return t('errors.onlyAdmin')
   }
   if (details.includes('Add at least one candidate before starting')) {
-    return 'Add at least one candidate before starting voting.'
+    return t('errors.needCandidateFirst')
   }
   if (details.includes('Action not allowed in current election state')) {
-    return 'This action is not allowed in the current election state. Reload the page to see the latest state.'
+    return t('errors.wrongState')
   }
-  return describeWalletError(err) ?? `Admin action failed: ${err.shortMessage ?? err.message}`
+  return (
+    describeWalletError(err, t) ?? t('errors.adminFailed', { reason: err.shortMessage ?? err.message })
+  )
 }

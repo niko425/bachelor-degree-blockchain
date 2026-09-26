@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Contract } from 'ethers'
 import { BALLOT_ABI, FACTORY_ABI, FACTORY_ADDRESS, FACTORY_DEPLOY_BLOCK } from '../contract'
 import { ELECTION_STATES } from '../lib/constants'
@@ -7,6 +8,13 @@ import { queryFilterInChunks } from '../lib/events'
 import { isOnSepolia } from './useWallet'
 
 export function useElections() {
+  const { t } = useTranslation()
+  const tRef = useRef(t)
+
+  useEffect(() => {
+    tRef.current = t
+  }, [t])
+
   const [elections, setElections] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -20,7 +28,7 @@ export function useElections() {
     setLoading(true)
     try {
       if (!(await isOnSepolia(provider))) {
-        setError('MetaMask is not on the Sepolia network. Switch to Sepolia, reload the page and connect again.')
+        setError(tRef.current('errors.wrongNetwork'))
         return
       }
 
@@ -61,7 +69,7 @@ export function useElections() {
       setElections(list)
     } catch (err) {
       const reason = err.error?.message ?? err.info?.error?.message ?? err.shortMessage ?? err.message
-      setError(`Could not load the elections from the factory: ${reason}`)
+      setError(tRef.current('electionList.loadFailed', { reason }))
     } finally {
       setLoading(false)
     }
@@ -79,11 +87,11 @@ export function useElections() {
       const tx = await factory.createElection(title)
       await tx.wait()
 
-      setCreateNotice(`Created election "${title}".`)
+      setCreateNotice(t('electionList.created', { title }))
       await loadElections(provider)
       return true
     } catch (err) {
-      setCreateError(describeAdminError(err))
+      setCreateError(describeAdminError(err, t))
       return false
     } finally {
       setCreating(false)

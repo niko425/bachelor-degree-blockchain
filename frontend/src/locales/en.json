@@ -1,0 +1,123 @@
+{
+  "app": {
+    "title": "Blockchain voting"
+  },
+  "language": {
+    "label": "Language",
+    "mk": "MK",
+    "sq": "SQ",
+    "en": "EN"
+  },
+  "contract": {
+    "factory": "Factory",
+    "election": "Election",
+    "network": "Network",
+    "networkName": "Sepolia"
+  },
+  "wallet": {
+    "connect": "Connect wallet",
+    "connecting": "Connecting...",
+    "connected": "Connected wallet:",
+    "notDetected": "MetaMask not detected. Install the MetaMask extension and reload the page.",
+    "rejected": "Connection request was rejected."
+  },
+  "electionList": {
+    "connectPrompt": "Connect your wallet to see the elections.",
+    "loading": "Loading elections...",
+    "empty": "No elections have been created yet.",
+    "open": "Open",
+    "createLegend": "Create election",
+    "titleLabel": "Election title",
+    "create": "Create election",
+    "creating": "Creating...",
+    "created": "Created election \"{{title}}\".",
+    "loadFailed": "Could not load the elections from the factory: {{reason}}"
+  },
+  "election": {
+    "back": "Back to all elections",
+    "fallbackTitle": "Election",
+    "connectPrompt": "Connect your wallet to see this election.",
+    "invalidAddress": "This is not a valid contract address.",
+    "loading": "Loading election...",
+    "notFromFactory": "This address is not an election created by this factory."
+  },
+  "candidates": {
+    "loading": "Loading candidates...",
+    "empty": "No candidates have been added yet.",
+    "vote": "Vote",
+    "voting": "Voting...",
+    "votes_one": "{{count}} vote",
+    "votes_other": "{{count}} votes",
+    "loadFailed": "Could not load candidates from the contract: {{reason}}"
+  },
+  "stats": {
+    "registered": "Registered voters",
+    "votesCast": "Votes cast",
+    "turnout": "Turnout",
+    "candidates": "Candidates",
+    "state": "State"
+  },
+  "state": {
+    "Setup": "Setup",
+    "Voting": "Voting",
+    "Ended": "Ended"
+  },
+  "results": {
+    "heading": "Results",
+    "noVotes": "No votes yet."
+  },
+  "activity": {
+    "heading": "Activity log",
+    "loading": "Loading activity...",
+    "empty": "No activity yet.",
+    "voteCast": "Vote cast for {{name}}",
+    "votingOpened": "Voting opened",
+    "votingClosed": "Voting closed",
+    "stateChanged": "Election state changed to {{state}}",
+    "unknownCandidate": "candidate #{{id}}",
+    "loadFailed": "Could not load the activity log: {{reason}}"
+  },
+  "admin": {
+    "legend": "Admin panel",
+    "stateLabel": "Election state:",
+    "candidateName": "Candidate name",
+    "addCandidate": "Add candidate",
+    "adding": "Adding...",
+    "voterAddress": "Voter address",
+    "addressPlaceholder": "0x...",
+    "approveVoter": "Approve voter",
+    "approving": "Approving...",
+    "startVoting": "Start voting",
+    "starting": "Starting...",
+    "endVoting": "End voting",
+    "ending": "Ending...",
+    "needCandidate": "Add at least one candidate before starting voting.",
+    "ended": "Voting has ended, showing final results",
+    "candidateAdded": "Added candidate \"{{name}}\".",
+    "voterApproved": "Approved voter {{address}}.",
+    "votingOpened": "Voting is now open.",
+    "votingClosed": "Voting has been closed.",
+    "enterName": "Enter a candidate name.",
+    "enterAddress": "Enter a valid wallet address (0x followed by 40 hexadecimal characters), copied exactly.",
+    "loadFailed": "Could not load election details from the contract: {{reason}}"
+  },
+  "errors": {
+    "wrongNetwork": "MetaMask is not on the Sepolia network. Switch to Sepolia, reload the page and connect again.",
+    "rejectedVote": "You rejected the transaction in MetaMask, so no vote was cast.",
+    "rejectedAdmin": "You rejected the transaction in MetaMask, so nothing was changed.",
+    "alreadyVoted": "You have already voted in this election. Each approved wallet can vote only once.",
+    "notApproved": "This wallet is not an approved voter. Ask the election admin to approve your address.",
+    "votingNotOpen": "Voting is not open right now.",
+    "onlyOwner": "Only the factory owner can create elections.",
+    "emptyTitle": "Enter a title for the election.",
+    "voterAlreadyApproved": "That wallet is already an approved voter.",
+    "zeroAddress": "Enter a real wallet address; the zero address cannot be approved.",
+    "onlyAdmin": "Only the election admin can do this. Check that MetaMask is still on the admin account.",
+    "needCandidateFirst": "Add at least one candidate before starting voting.",
+    "wrongState": "This action is not allowed in the current election state. Reload the page to see the latest state.",
+    "insufficientFunds": "This wallet does not have enough Sepolia ETH to pay the transaction fee.",
+    "networkChanged": "MetaMask switched networks. Switch back to Sepolia, reload the page and connect again.",
+    "voteFailed": "Vote failed: {{reason}}",
+    "adminFailed": "Admin action failed: {{reason}}"
+  }
+}

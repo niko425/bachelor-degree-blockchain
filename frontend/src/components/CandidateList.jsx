@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 function CandidateList({
   account,
   candidates,
@@ -9,13 +11,15 @@ function CandidateList({
   onVote,
   onTickEnd,
 }) {
+  const { t } = useTranslation()
+
   return (
     <>
-      {account && !candidates && !candidatesError && <p>Loading candidates...</p>}
+      {account && !candidates && !candidatesError && <p>{t('candidates.loading')}</p>}
 
       {candidatesError && <p role="alert">{candidatesError}</p>}
 
-      {candidates && candidates.length === 0 && <p>No candidates have been added yet.</p>}
+      {candidates && candidates.length === 0 && <p>{t('candidates.empty')}</p>}
 
       {candidates && candidates.length > 0 && (
         <ul className="candidate-list">
@@ -26,7 +30,7 @@ function CandidateList({
                 className={i === lastVotedId ? 'vote-count vote-tick' : 'vote-count'}
                 onAnimationEnd={onTickEnd}
               >
-                {c.voteCount} {c.voteCount === '1' ? 'vote' : 'votes'}
+                {t('candidates.votes', { count: Number(c.voteCount) })}
               </span>
               <button
                 type="button"
@@ -34,7 +38,7 @@ function CandidateList({
                 onClick={() => onVote(i)}
                 disabled={votingFor !== null || stateLabel !== 'Voting'}
               >
-                {votingFor === i ? 'Voting...' : 'Vote'}
+                {votingFor === i ? t('candidates.voting') : t('candidates.vote')}
               </button>
             </li>
           ))}

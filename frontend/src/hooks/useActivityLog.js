@@ -1,10 +1,18 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Contract } from 'ethers'
 import { BALLOT_ABI, FACTORY_DEPLOY_BLOCK } from '../contract'
 import { queryFilterInChunks } from '../lib/events'
 import { isOnSepolia } from './useWallet'
 
 export function useActivityLog(electionAddress, fromBlock) {
+  const { t } = useTranslation()
+  const tRef = useRef(t)
+
+  useEffect(() => {
+    tRef.current = t
+  }, [t])
+
   const [activity, setActivity] = useState(null)
   const [activityLoading, setActivityLoading] = useState(false)
   const [activityError, setActivityError] = useState(null)
@@ -41,7 +49,7 @@ export function useActivityLog(electionAddress, fromBlock) {
         })))
       } catch (err) {
         const reason = err.error?.message ?? err.info?.error?.message ?? err.shortMessage ?? err.message
-        setActivityError(`Could not load the activity log: ${reason}`)
+        setActivityError(tRef.current('activity.loadFailed', { reason }))
       } finally {
         setActivityLoading(false)
       }

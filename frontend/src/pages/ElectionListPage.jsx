@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import ContractInfo from '../components/ContractInfo'
 import WalletConnect from '../components/WalletConnect'
 import { FACTORY_ADDRESS } from '../contract'
 import { formatTurnout } from '../lib/format'
+import { localeFor } from '../lib/i18n'
 
 function ElectionListPage({ wallet, factory, onConnect }) {
+  const { t, i18n } = useTranslation()
+  const locale = localeFor(i18n.language)
   const { account, provider } = wallet
   const [newTitle, setNewTitle] = useState('')
 
@@ -32,9 +36,9 @@ function ElectionListPage({ wallet, factory, onConnect }) {
 
   return (
     <>
-      <h1>Blockchain voting</h1>
+      <h1>{t('app.title')}</h1>
 
-      <ContractInfo label="Factory" address={FACTORY_ADDRESS} />
+      <ContractInfo label={t('contract.factory')} address={FACTORY_ADDRESS} />
 
       <WalletConnect
         account={account}
@@ -43,27 +47,27 @@ function ElectionListPage({ wallet, factory, onConnect }) {
         onConnect={onConnect}
       />
 
-      {!account && <p>Connect your wallet to see the elections.</p>}
+      {!account && <p>{t('electionList.connectPrompt')}</p>}
 
-      {account && factory.loading && !factory.elections && <p>Loading elections...</p>}
+      {account && factory.loading && !factory.elections && <p>{t('electionList.loading')}</p>}
 
       {factory.error && <p role="alert">{factory.error}</p>}
 
-      {factory.elections && factory.elections.length === 0 && <p>No elections have been created yet.</p>}
+      {factory.elections && factory.elections.length === 0 && <p>{t('electionList.empty')}</p>}
 
       {factory.elections && factory.elections.length > 0 && (
         <ul className="election-list">
           {factory.elections.map((election) => (
             <li key={election.address}>
               <span>{election.title}</span>
-              <span className="election-state">{election.stateLabel}</span>
+              <span className="election-state">{t(`state.${election.stateLabel}`)}</span>
               <span className="election-figure">
-                {election.totalVotes} {election.totalVotes === 1 ? 'vote' : 'votes'}
+                {t('candidates.votes', { count: election.totalVotes })}
               </span>
               <span className="election-figure">
-                {formatTurnout(election.totalVotes, election.approvedVoterCount)}
+                {formatTurnout(election.totalVotes, election.approvedVoterCount, locale)}
               </span>
-              <Link to={`/election/${election.address}`}>Open</Link>
+              <Link to={`/election/${election.address}`}>{t('electionList.open')}</Link>
             </li>
           ))}
         </ul>
@@ -71,11 +75,11 @@ function ElectionListPage({ wallet, factory, onConnect }) {
 
       {isOwner && (
         <fieldset className="admin-panel" disabled={factory.creating}>
-          <legend>Create election</legend>
+          <legend>{t('electionList.createLegend')}</legend>
 
           <form onSubmit={handleCreateElection}>
             <label>
-              Election title{' '}
+              {t('electionList.titleLabel')}{' '}
               <input
                 type="text"
                 value={newTitle}
@@ -83,7 +87,7 @@ function ElectionListPage({ wallet, factory, onConnect }) {
               />
             </label>{' '}
             <button type="submit" className="button-seal">
-              {factory.creating ? 'Creating...' : 'Create election'}
+              {factory.creating ? t('electionList.creating') : t('electionList.create')}
             </button>
           </form>
 

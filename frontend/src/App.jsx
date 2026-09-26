@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import LanguageSwitcher from './components/LanguageSwitcher'
 import { useElections } from './hooks/useElections'
 import { useWallet } from './hooks/useWallet'
 import ElectionListPage from './pages/ElectionListPage'
@@ -18,6 +19,8 @@ function App() {
   return (
     <section id="center">
       <span className="contract-watermark" aria-hidden="true">VERIFIABLE</span>
+
+      <LanguageSwitcher />
 
       <Routes key={wallet.account ?? 'disconnected'}>
         <Route

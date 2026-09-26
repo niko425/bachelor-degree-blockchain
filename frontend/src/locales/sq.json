@@ -1,0 +1,123 @@
+{
+  "app": {
+    "title": "Votim në blockchain"
+  },
+  "language": {
+    "label": "Gjuha",
+    "mk": "MK",
+    "sq": "SQ",
+    "en": "EN"
+  },
+  "contract": {
+    "factory": "Fabrika",
+    "election": "Zgjedhjet",
+    "network": "Rrjeti",
+    "networkName": "Sepolia"
+  },
+  "wallet": {
+    "connect": "Lidh portofolin",
+    "connecting": "Po lidhet...",
+    "connected": "Portofoli i lidhur:",
+    "notDetected": "MetaMask nuk u gjet. Instaloni shtesën MetaMask dhe rifreskoni faqen.",
+    "rejected": "Kërkesa për lidhje u refuzua."
+  },
+  "electionList": {
+    "connectPrompt": "Lidhni portofolin për të parë zgjedhjet.",
+    "loading": "Po ngarkohen zgjedhjet...",
+    "empty": "Ende nuk janë krijuar zgjedhje.",
+    "open": "Hap",
+    "createLegend": "Krijo zgjedhje",
+    "titleLabel": "Titulli i zgjedhjeve",
+    "create": "Krijo zgjedhje",
+    "creating": "Po krijohet...",
+    "created": "U krijuan zgjedhjet „{{title}}“.",
+    "loadFailed": "Nuk u ngarkuan dot zgjedhjet nga fabrika: {{reason}}"
+  },
+  "election": {
+    "back": "Kthehu te të gjitha zgjedhjet",
+    "fallbackTitle": "Zgjedhje",
+    "connectPrompt": "Lidhni portofolin për të parë këto zgjedhje.",
+    "invalidAddress": "Kjo nuk është adresë e vlefshme kontrate.",
+    "loading": "Po ngarkohen zgjedhjet...",
+    "notFromFactory": "Kjo adresë nuk është zgjedhje e krijuar nga kjo fabrikë."
+  },
+  "candidates": {
+    "loading": "Po ngarkohen kandidatët...",
+    "empty": "Ende nuk janë shtuar kandidatë.",
+    "vote": "Voto",
+    "voting": "Po votohet...",
+    "votes_one": "{{count}} votë",
+    "votes_other": "{{count}} vota",
+    "loadFailed": "Nuk u ngarkuan dot kandidatët nga kontrata: {{reason}}"
+  },
+  "stats": {
+    "registered": "Votues të regjistruar",
+    "votesCast": "Vota të hedhura",
+    "turnout": "Pjesëmarrja",
+    "candidates": "Kandidatë",
+    "state": "Gjendja"
+  },
+  "state": {
+    "Setup": "Përgatitje",
+    "Voting": "Votim",
+    "Ended": "Përfunduar"
+  },
+  "results": {
+    "heading": "Rezultatet",
+    "noVotes": "Ende nuk ka vota."
+  },
+  "activity": {
+    "heading": "Regjistri i aktivitetit",
+    "loading": "Po ngarkohet aktiviteti...",
+    "empty": "Ende nuk ka aktivitet.",
+    "voteCast": "Votë e hedhur për {{name}}",
+    "votingOpened": "Votimi u hap",
+    "votingClosed": "Votimi u mbyll",
+    "stateChanged": "Gjendja e zgjedhjeve ndryshoi në {{state}}",
+    "unknownCandidate": "kandidati #{{id}}",
+    "loadFailed": "Nuk u ngarkua dot regjistri i aktivitetit: {{reason}}"
+  },
+  "admin": {
+    "legend": "Paneli i administratorit",
+    "stateLabel": "Gjendja e zgjedhjeve:",
+    "candidateName": "Emri i kandidatit",
+    "addCandidate": "Shto kandidat",
+    "adding": "Po shtohet...",
+    "voterAddress": "Adresa e votuesit",
+    "addressPlaceholder": "0x...",
+    "approveVoter": "Mirato votuesin",
+    "approving": "Po miratohet...",
+    "startVoting": "Fillo votimin",
+    "starting": "Po fillon...",
+    "endVoting": "Mbyll votimin",
+    "ending": "Po mbyllet...",
+    "needCandidate": "Shtoni të paktën një kandidat përpara se të filloni votimin.",
+    "ended": "Votimi ka përfunduar, po shfaqen rezultatet përfundimtare",
+    "candidateAdded": "U shtua kandidati „{{name}}“.",
+    "voterApproved": "U miratua votuesi {{address}}.",
+    "votingOpened": "Votimi tani është i hapur.",
+    "votingClosed": "Votimi u mbyll.",
+    "enterName": "Shkruani emrin e kandidatit.",
+    "enterAddress": "Shkruani një adresë të vlefshme portofoli (0x e ndjekur nga 40 karaktere heksadecimale), e kopjuar saktësisht.",
+    "loadFailed": "Nuk u ngarkuan dot detajet e zgjedhjeve nga kontrata: {{reason}}"
+  },
+  "errors": {
+    "wrongNetwork": "MetaMask nuk është në rrjetin Sepolia. Kaloni në Sepolia, rifreskoni faqen dhe lidhuni sërish.",
+    "rejectedVote": "E refuzuat transaksionin në MetaMask, prandaj nuk u hodh asnjë votë.",
+    "rejectedAdmin": "E refuzuat transaksionin në MetaMask, prandaj asgjë nuk ndryshoi.",
+    "alreadyVoted": "Ju keni votuar tashmë në këto zgjedhje. Çdo portofol i miratuar mund të votojë vetëm një herë.",
+    "notApproved": "Ky portofol nuk është votues i miratuar. Kërkojini administratorit të zgjedhjeve të miratojë adresën tuaj.",
+    "votingNotOpen": "Votimi nuk është i hapur për momentin.",
+    "onlyOwner": "Vetëm pronari i fabrikës mund të krijojë zgjedhje.",
+    "emptyTitle": "Shkruani një titull për zgjedhjet.",
+    "voterAlreadyApproved": "Ai portofol është tashmë votues i miratuar.",
+    "zeroAddress": "Shkruani një adresë reale portofoli; adresa zero nuk mund të miratohet.",
+    "onlyAdmin": "Vetëm administratori i zgjedhjeve mund ta bëjë këtë. Kontrolloni nëse MetaMask është ende në llogarinë e administratorit.",
+    "needCandidateFirst": "Shtoni të paktën një kandidat përpara se të filloni votimin.",
+    "wrongState": "Ky veprim nuk lejohet në gjendjen aktuale të zgjedhjeve. Rifreskoni faqen për të parë gjendjen më të fundit.",
+    "insufficientFunds": "Ky portofol nuk ka mjaftueshëm Sepolia ETH për të paguar tarifën e transaksionit.",
+    "networkChanged": "MetaMask ndryshoi rrjetin. Kthehuni te Sepolia, rifreskoni faqen dhe lidhuni sërish.",
+    "voteFailed": "Votimi dështoi: {{reason}}",
+    "adminFailed": "Veprimi i administratorit dështoi: {{reason}}"
+  }
+}

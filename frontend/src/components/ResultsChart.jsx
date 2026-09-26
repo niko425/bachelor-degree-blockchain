@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { formatShare } from '../lib/format'
+import { localeFor } from '../lib/i18n'
 
 const SLICE_COLORS = [
   '#8C1F2B',
@@ -19,6 +21,9 @@ function prefersReducedMotion() {
 }
 
 function ResultsChart({ candidates }) {
+  const { t, i18n } = useTranslation()
+  const locale = localeFor(i18n.language)
+
   if (!candidates || candidates.length === 0) {
     return null
   }
@@ -33,9 +38,9 @@ function ResultsChart({ candidates }) {
 
   return (
     <section aria-labelledby="results-heading">
-      <h2 id="results-heading">Results</h2>
+      <h2 id="results-heading">{t('results.heading')}</h2>
 
-      {votesCast === 0 && <p>No votes yet.</p>}
+      {votesCast === 0 && <p>{t('results.noVotes')}</p>}
 
       {votesCast > 0 && (
         <>
@@ -67,10 +72,8 @@ function ResultsChart({ candidates }) {
               <li key={i}>
                 <span className="results-swatch" style={{ background: slice.color }} aria-hidden="true" />
                 <span>{slice.name}</span>
-                <span className="results-figure">
-                  {slice.value} {slice.value === 1 ? 'vote' : 'votes'}
-                </span>
-                <span className="results-figure">{formatShare(slice.value, votesCast)}</span>
+                <span className="results-figure">{t('candidates.votes', { count: slice.value })}</span>
+                <span className="results-figure">{formatShare(slice.value, votesCast, locale)}</span>
               </li>
             ))}
           </ul>

@@ -1,48 +1,51 @@
+import { useTranslation } from 'react-i18next'
 import { ELECTION_STATES } from '../lib/constants'
+import { formatDateTime } from '../lib/format'
+import { localeFor } from '../lib/i18n'
 
-function describeActivity(entry, candidates) {
+function describeActivity(entry, candidates, t) {
   if (entry.eventName === 'VoteCast') {
-    const name = candidates?.[entry.candidateId]?.name ?? `candidate #${entry.candidateId}`
-    return `Vote cast for ${name}`
+    const name =
+      candidates?.[entry.candidateId]?.name ?? t('activity.unknownCandidate', { id: entry.candidateId })
+    return t('activity.voteCast', { name })
   }
 
   const newState = ELECTION_STATES[entry.newState]
   if (newState === 'Voting') {
-    return 'Voting opened'
+    return t('activity.votingOpened')
   }
   if (newState === 'Ended') {
-    return 'Voting closed'
+    return t('activity.votingClosed')
   }
-  return `Election state changed to ${newState}`
-}
-
-function formatBlockTime(timestamp) {
-  return new Date(timestamp * 1000).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  return t('activity.stateChanged', { state: t(`state.${newState}`) })
 }
 
 function ActivityLog({ account, activity, activityLoading, activityError, candidates }) {
+  const { t, i18n } = useTranslation()
+  const locale = localeFor(i18n.language)
+
   if (!account) {
     return null
   }
 
   return (
     <section aria-labelledby="activity-log-heading">
-      <h2 id="activity-log-heading">Activity log</h2>
+      <h2 id="activity-log-heading">{t('activity.heading')}</h2>
 
-      {activityLoading && <p>Loading activity...</p>}
+      {activityLoading && <p>{t('activity.loading')}</p>}
 
       {activityError && <p role="alert">{activityError}</p>}
 
-      {!activityLoading && activity && activity.length === 0 && <p>No activity yet.</p>}
+      {!activityLoading && activity && activity.length === 0 && <p>{t('activity.empty')}</p>}
 
       {activity && activity.length > 0 && (
         <ul className="activity-log">
           {activity.map((entry) => (
             <li key={entry.key}>
               <time className="activity-time" dateTime={new Date(entry.timestamp * 1000).toISOString()}>
-                {formatBlockTime(entry.timestamp)}
+                {formatDateTime(entry.timestamp, locale)}
               </time>
-              <span>{describeActivity(entry, candidates)}</span>
+              <span>{describeActivity(entry, candidates, t)}</span>
             </li>
           ))}
         </ul>

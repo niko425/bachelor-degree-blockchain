@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrowserProvider, getAddress } from 'ethers'
 import { SEPOLIA_CHAIN_ID } from '../lib/constants'
 
@@ -8,6 +9,7 @@ export async function isOnSepolia(provider) {
 }
 
 export function useWallet() {
+  const { t } = useTranslation()
   const [account, setAccount] = useState(null)
   const [provider, setProvider] = useState(null)
   const [error, setError] = useState(null)
@@ -17,7 +19,7 @@ export function useWallet() {
     setError(null)
 
     if (!window.ethereum) {
-      setError('MetaMask not detected. Install the MetaMask extension and reload the page.')
+      setError(t('wallet.notDetected'))
       return
     }
 
@@ -32,7 +34,7 @@ export function useWallet() {
 
       await onConnected(browserProvider)
     } catch (err) {
-      setError(err.code === 4001 ? 'Connection request was rejected.' : err.message)
+      setError(err.code === 4001 ? t('wallet.rejected') : err.message)
     } finally {
       setConnecting(false)
     }

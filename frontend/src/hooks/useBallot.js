@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Contract, isAddress } from 'ethers'
 import { BALLOT_ABI } from '../contract'
 import { ELECTION_STATES } from '../lib/constants'
@@ -6,6 +7,13 @@ import { describeAdminError, describeVoteError } from '../lib/errors'
 import { isOnSepolia } from './useWallet'
 
 export function useBallot(provider, electionAddress, loadActivity, onElectionChanged) {
+  const { t } = useTranslation()
+  const tRef = useRef(t)
+
+  useEffect(() => {
+    tRef.current = t
+  }, [t])
+
   const [candidates, setCandidates] = useState(null)
   const [candidatesError, setCandidatesError] = useState(null)
   const [votingFor, setVotingFor] = useState(null)
@@ -27,7 +35,7 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
     setCandidatesError(null)
     try {
       if (!(await isOnSepolia(provider))) {
-        setCandidatesError('MetaMask is not on the Sepolia network. Switch to Sepolia, reload the page and connect again.')
+        setCandidatesError(tRef.current('errors.wrongNetwork'))
         return
       }
 
@@ -36,7 +44,9 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
 
       setCandidates(results.map((c) => ({ name: c.name, voteCount: c.voteCount.toString() })))
     } catch (err) {
-      setCandidatesError(`Could not load candidates from the contract: ${err.shortMessage ?? err.message}`)
+      setCandidatesError(
+        tRef.current('candidates.loadFailed', { reason: err.shortMessage ?? err.message })
+      )
     }
   }, [electionAddress])
 
@@ -61,7 +71,7 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
       setApprovedVoterCount(Number(approved))
       setTotalVotes(Number(votes))
     } catch (err) {
-      setAdminError(`Could not load election details from the contract: ${err.shortMessage ?? err.message}`)
+      setAdminError(tRef.current('admin.loadFailed', { reason: err.shortMessage ?? err.message }))
     }
   }, [electionAddress])
 
@@ -85,7 +95,7 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
 
       onElectionChanged?.()
     } catch (err) {
-      setVoteError(describeVoteError(err))
+      setVoteError(describeVoteError(err, t))
     } finally {
       setVotingFor(null)
     }
@@ -112,7 +122,7 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
       onElectionChanged?.()
       return true
     } catch (err) {
-      setAdminError(describeAdminError(err))
+      setAdminError(describeAdminError(err, t))
       return false
     } finally {
       setAdminAction(null)
@@ -123,30 +133,38 @@ export function useBallot(provider, electionAddress, loadActivity, onElectionCha
     const name = rawName.trim()
     if (!name) {
       setAdminNotice(null)
-      setAdminError('Enter a candidate name.')
+      setAdminError(t('admin.enterName'))
       return false
     }
 
-    return runAdminAction('addCandidate', (ballot) => ballot.addCandidate(name), `Added candidate "${name}".`)
+    return runAdminAction(
+      'addCandidate',
+      (ballot) => ballot.addCandidate(name),
+      t('admin.candidateAdded', { name })
+    )
   }
 
   async function approveVoter(rawAddress) {
     const address = rawAddress.trim()
     if (!isAddress(address)) {
       setAdminNotice(null)
-      setAdminError('Enter a valid wallet address (0x followed by 40 hexadecimal characters), copied exactly.')
+      setAdminError(t('admin.enterAddress'))
       return false
     }
 
-    return runAdminAction('approveVoter', (ballot) => ballot.approveVoter(address), `Approved voter ${address}.`)
+    return runAdminAction(
+      'approveVoter',
+      (ballot) => ballot.approveVoter(address),
+      t('admin.voterApproved', { address })
+    )
   }
 
   function startVoting() {
-    return runAdminAction('startVoting', (ballot) => ballot.startVoting(), 'Voting is now open.')
+    return runAdminAction('startVoting', (ballot) => ballot.startVoting(), t('admin.votingOpened'))
   }
 
   function endVoting() {
-    return runAdminAction('endVoting', (ballot) => ballot.endVoting(), 'Voting has been closed.')
+    return runAdminAction('endVoting', (ballot) => ballot.endVoting(), t('admin.votingClosed'))
   }
 
   return {

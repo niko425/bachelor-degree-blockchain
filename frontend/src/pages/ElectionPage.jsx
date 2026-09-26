@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { isAddress } from 'ethers'
 import ActivityLog from '../components/ActivityLog'
@@ -12,6 +13,7 @@ import { useActivityLog } from '../hooks/useActivityLog'
 import { useBallot } from '../hooks/useBallot'
 
 function ElectionPage({ wallet, factory, onConnect }) {
+  const { t } = useTranslation()
   const { address } = useParams()
   const { account, provider } = wallet
 
@@ -52,13 +54,13 @@ function ElectionPage({ wallet, factory, onConnect }) {
     <>
       <p>
         <Link className="back-link" to="/">
-          Back to all elections
+          {t('election.back')}
         </Link>
       </p>
 
-      <h1>{election ? election.title : 'Election'}</h1>
+      <h1>{election ? election.title : t('election.fallbackTitle')}</h1>
 
-      <ContractInfo label="Election" address={address} />
+      <ContractInfo label={t('contract.election')} address={address} />
 
       <WalletConnect
         account={account}
@@ -67,16 +69,16 @@ function ElectionPage({ wallet, factory, onConnect }) {
         onConnect={onConnect}
       />
 
-      {!account && <p>Connect your wallet to see this election.</p>}
+      {!account && <p>{t('election.connectPrompt')}</p>}
 
-      {account && !isAddress(address) && (
-        <p role="alert">This is not a valid contract address.</p>
+      {account && !isAddress(address) && <p role="alert">{t('election.invalidAddress')}</p>}
+
+      {account && isAddress(address) && factory.loading && !factory.elections && (
+        <p>{t('election.loading')}</p>
       )}
 
-      {account && isAddress(address) && factory.loading && !factory.elections && <p>Loading election...</p>}
-
       {account && isAddress(address) && !factory.loading && factory.elections && !election && (
-        <p role="alert">This address is not an election created by this factory.</p>
+        <p role="alert">{t('election.notFromFactory')}</p>
       )}
 
       {election && (

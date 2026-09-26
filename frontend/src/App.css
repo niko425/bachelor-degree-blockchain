@@ -372,3 +372,26 @@ a {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
+
+.language-switcher {
+  display: flex;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.language-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.language-button-active {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

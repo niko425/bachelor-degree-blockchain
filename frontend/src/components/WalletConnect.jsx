@@ -1,9 +1,13 @@
+import { useTranslation } from 'react-i18next'
+
 function WalletConnect({ account, connecting, error, onConnect }) {
+  const { t } = useTranslation()
+
   return (
     <>
       {account ? (
         <p>
-          Connected wallet: <code>{account}</code>
+          {t('wallet.connected')} <code>{account}</code>
         </p>
       ) : (
         <button
@@ -11,7 +15,7 @@ function WalletConnect({ account, connecting, error, onConnect }) {
           onClick={onConnect}
           disabled={connecting}
         >
-          {connecting ? 'Connecting...' : 'Connect wallet'}
+          {connecting ? t('wallet.connecting') : t('wallet.connect')}
         </button>
       )}
 
