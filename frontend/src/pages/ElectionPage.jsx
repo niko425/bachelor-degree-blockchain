@@ -8,11 +8,10 @@ import CandidateList from '../components/CandidateList'
 import ContractInfo from '../components/ContractInfo'
 import ElectionStats from '../components/ElectionStats'
 import ResultsChart from '../components/ResultsChart'
-import WalletConnect from '../components/WalletConnect'
 import { useActivityLog } from '../hooks/useActivityLog'
 import { useBallot } from '../hooks/useBallot'
 
-function ElectionPage({ wallet, factory, onConnect }) {
+function ElectionPage({ wallet, factory }) {
   const { t } = useTranslation()
   const { address } = useParams()
   const { account, provider } = wallet
@@ -52,7 +51,7 @@ function ElectionPage({ wallet, factory, onConnect }) {
 
   return (
     <>
-      <p>
+      <p className="back-link-row">
         <Link className="back-link" to="/">
           {t('election.back')}
         </Link>
@@ -61,13 +60,6 @@ function ElectionPage({ wallet, factory, onConnect }) {
       <h1>{election ? election.title : t('election.fallbackTitle')}</h1>
 
       <ContractInfo label={t('contract.election')} address={address} />
-
-      <WalletConnect
-        account={account}
-        connecting={wallet.connecting}
-        error={wallet.error}
-        onConnect={onConnect}
-      />
 
       {!account && <p>{t('election.connectPrompt')}</p>}
 
@@ -90,6 +82,8 @@ function ElectionPage({ wallet, factory, onConnect }) {
             stateLabel={ballot.stateLabel}
           />
 
+          <ResultsChart candidates={ballot.candidates} />
+
           <CandidateList
             account={account}
             candidates={ballot.candidates}
@@ -100,16 +94,6 @@ function ElectionPage({ wallet, factory, onConnect }) {
             stateLabel={ballot.stateLabel}
             onVote={ballot.castVote}
             onTickEnd={ballot.clearVoteTick}
-          />
-
-          <ResultsChart candidates={ballot.candidates} />
-
-          <ActivityLog
-            account={account}
-            activity={activityLog.activity}
-            activityLoading={activityLog.activityLoading}
-            activityError={activityLog.activityError}
-            candidates={ballot.candidates}
           />
 
           {isAdmin && (
@@ -125,6 +109,14 @@ function ElectionPage({ wallet, factory, onConnect }) {
               onEndVoting={ballot.endVoting}
             />
           )}
+
+          <ActivityLog
+            account={account}
+            activity={activityLog.activity}
+            activityLoading={activityLog.activityLoading}
+            activityError={activityLog.activityError}
+            candidates={ballot.candidates}
+          />
         </>
       )}
     </>

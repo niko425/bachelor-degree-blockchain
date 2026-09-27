@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import WalletConnect from './components/WalletConnect'
 import { useElections } from './hooks/useElections'
 import { useWallet } from './hooks/useWallet'
 import ElectionListPage from './pages/ElectionListPage'
@@ -18,19 +19,22 @@ function App() {
 
   return (
     <section id="center">
-      <span className="contract-watermark" aria-hidden="true">VERIFIABLE</span>
+      <header className="page-header">
+        <div className="page-header-wallet">
+          <WalletConnect
+            account={wallet.account}
+            connecting={wallet.connecting}
+            error={wallet.error}
+            onConnect={handleConnect}
+          />
+        </div>
 
-      <LanguageSwitcher />
+        <LanguageSwitcher />
+      </header>
 
       <Routes key={wallet.account ?? 'disconnected'}>
-        <Route
-          path="/"
-          element={<ElectionListPage wallet={wallet} factory={factory} onConnect={handleConnect} />}
-        />
-        <Route
-          path="/election/:address"
-          element={<ElectionPage wallet={wallet} factory={factory} onConnect={handleConnect} />}
-        />
+        <Route path="/" element={<ElectionListPage wallet={wallet} factory={factory} />} />
+        <Route path="/election/:address" element={<ElectionPage wallet={wallet} factory={factory} />} />
       </Routes>
     </section>
   )

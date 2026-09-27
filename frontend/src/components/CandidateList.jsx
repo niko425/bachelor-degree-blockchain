@@ -12,9 +12,12 @@ function CandidateList({
   onTickEnd,
 }) {
   const { t } = useTranslation()
+  const canVote = stateLabel === 'Voting'
 
   return (
-    <>
+    <section aria-labelledby="candidates-heading">
+      <h2 id="candidates-heading">{t('candidates.heading')}</h2>
+
       {account && !candidates && !candidatesError && <p>{t('candidates.loading')}</p>}
 
       {candidatesError && <p role="alert">{candidatesError}</p>}
@@ -32,21 +35,23 @@ function CandidateList({
               >
                 {t('candidates.votes', { count: Number(c.voteCount) })}
               </span>
-              <button
-                type="button"
-                className="button-seal"
-                onClick={() => onVote(i)}
-                disabled={votingFor !== null || stateLabel !== 'Voting'}
-              >
-                {votingFor === i ? t('candidates.voting') : t('candidates.vote')}
-              </button>
+              {canVote && (
+                <button
+                  type="button"
+                  className="button-seal"
+                  onClick={() => onVote(i)}
+                  disabled={votingFor !== null}
+                >
+                  {votingFor === i ? t('candidates.voting') : t('candidates.vote')}
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
       {voteError && <p role="alert">{voteError}</p>}
-    </>
+    </section>
   )
 }
 

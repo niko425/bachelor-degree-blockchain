@@ -43,7 +43,7 @@ function ResultsChart({ candidates }) {
       {votesCast === 0 && <p>{t('results.noVotes')}</p>}
 
       {votesCast > 0 && (
-        <>
+        <div className="results-layout">
           <div className="results-chart">
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -77,7 +77,7 @@ function ResultsChart({ candidates }) {
               </li>
             ))}
           </ul>
-        </>
+        </div>
       )}
     </section>
   )

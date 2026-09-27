@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import ContractInfo from '../components/ContractInfo'
-import WalletConnect from '../components/WalletConnect'
 import { FACTORY_ADDRESS } from '../contract'
 import { formatTurnout } from '../lib/format'
 import { localeFor } from '../lib/i18n'
 
-function ElectionListPage({ wallet, factory, onConnect }) {
+function ElectionListPage({ wallet, factory }) {
   const { t, i18n } = useTranslation()
   const locale = localeFor(i18n.language)
   const { account, provider } = wallet
@@ -40,13 +39,6 @@ function ElectionListPage({ wallet, factory, onConnect }) {
 
       <ContractInfo label={t('contract.factory')} address={FACTORY_ADDRESS} />
 
-      <WalletConnect
-        account={account}
-        connecting={wallet.connecting}
-        error={wallet.error}
-        onConnect={onConnect}
-      />
-
       {!account && <p>{t('electionList.connectPrompt')}</p>}
 
       {account && factory.loading && !factory.elections && <p>{t('electionList.loading')}</p>}
@@ -67,7 +59,7 @@ function ElectionListPage({ wallet, factory, onConnect }) {
               <span className="election-figure">
                 {formatTurnout(election.totalVotes, election.approvedVoterCount, locale)}
               </span>
-              <Link to={`/election/${election.address}`}>{t('electionList.open')}</Link>
+              <Link to={`/election/${election.address}`}>{t('electionList.view')}</Link>
             </li>
           ))}
         </ul>

@@ -25,7 +25,7 @@
     "connectPrompt": "Connect your wallet to see the elections.",
     "loading": "Loading elections...",
     "empty": "No elections have been created yet.",
-    "open": "Open",
+    "view": "View",
     "createLegend": "Create election",
     "titleLabel": "Election title",
     "create": "Create election",
@@ -42,6 +42,7 @@
     "notFromFactory": "This address is not an election created by this factory."
   },
   "candidates": {
+    "heading": "Candidates",
     "loading": "Loading candidates...",
     "empty": "No candidates have been added yet.",
     "vote": "Vote",
